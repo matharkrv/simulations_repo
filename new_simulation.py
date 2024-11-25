@@ -55,18 +55,25 @@ def simulation_process_2D(*args):
         delta_q,
         inv_cdf_interp,
         sample_detector_distance, k, pixel_number, centers, px_size) = args
+    # Generate a randomization using the given seed 
     rng = np.random.default_rng(seed)
+    # Initialize the intensity update array
     intensity_update = np.zeros([pixel_number, pixel_number]).astype(np.float64)
     for _ in prange(batch):
+        # Sample a random exit angle q from the inverse cdf
         q_random = inv_cdf_interp(rng.uniform(0, 1, size=sampling_size))
         if np.any(np.isfinite(q_random)):
+            # Find the angle
             angle_delta = np.arcsin(q_random / (2 * k))
+            # Generate a random azimuth angle from 0 to 2pi
             azimuth_angle = rng.uniform(0, 2 * np.pi - np.finfo(np.float64).eps, size=sampling_size)
         else:
             angle_delta = 0
             azimuth_angle = 0
+        # Generate a random set of entry angles and slit positions
         theta_in, chi_in, sl2_x, sl2_y = sample_from_slits(rng, slit_1_x, slit_1_y, slit_2_x, slit_2_y, slit_distance,
                                                            sampling_size)
+        # Preliminary calculations of the sin and cos of all the angles
         sin_T = sin(angle_delta)
         cos_T = cos(angle_delta)
         sin_t = sin(theta_in)
@@ -75,6 +82,7 @@ def simulation_process_2D(*args):
         cos_chi = cos(chi_in)
         sin_Chi = sin(azimuth_angle)
         cos_Chi = cos(azimuth_angle)
+        # Perform the equations to find the incident positions on the detector (x, y)
         r_x = sin_T * (cos_chi * cos_Chi * cos_t - sin_chi * sin_Chi) + cos_chi * sin_t * cos_T
         r_y = sin_T * (sin_chi * cos_Chi * cos_t + cos_chi * sin_Chi) + sin_chi * sin_t * cos_T
         r_z = cos_Chi * sin_t * sin_T - cos_t * cos_T
@@ -82,6 +90,7 @@ def simulation_process_2D(*args):
         y1 = sample_detector_distance * (r_y / r_z) + sl2_y
         x = x1 / px_size + centers[0]
         y = y1 / px_size + centers[1]
+        # Mask out every incident position outside of the detector 
         mask = (x <= pixel_number - 1) & (y <= pixel_number - 1) & (x >= 0) & (y >= 0)
         y_masked = np.round(y[mask], 0).astype(int)
         x_masked = np.round(x[mask], 0).astype(int)
