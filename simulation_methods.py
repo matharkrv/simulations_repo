@@ -208,3 +208,31 @@ def clean_data(data, threshold):
             cleaned_data[index + 1] = cleaned_data[index]
 
     return cleaned_data
+
+def bin_signal(x, y, x_binned):
+    """
+    Bin the signal y(x) according to the specified x_binned array.
+
+    Parameters:
+        x (array-like): The input x values of the signal.
+        y (array-like): The input y values of the signal corresponding to x.
+        x_binned (array-like): The bin edges to be used for binning x and y.
+
+    Returns:
+        y_binned (numpy array): The binned y values corresponding to x_binned.
+    """
+    # Step 1: Initialize y_binned list
+    y_binned = []
+
+    # Step 2: Compute the mean of y values in each bin range
+    for i in range(len(x_binned) - 1):
+        mask = (x >= x_binned[i]) & (x < x_binned[i + 1])
+        if np.any(mask):
+            y_binned.append(y[mask].mean())
+        else:
+            y_binned.append(0)  # Or use np.nan or another placeholder if no data falls into the bin
+
+    # Step 3: Add a placeholder for the last bin
+    y_binned.append(0)  # Placeholder for the last bin (no data falls here)
+    y_binned[-1] = y_binned[-2]
+    return np.array(y_binned)
