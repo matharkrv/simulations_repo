@@ -229,9 +229,10 @@ if __name__ == "__main__":
         file.write(f"wavelength: {wavelength_ / 100}")
 
     # Example for plotting the 1D data
+    plt.figure(1)
     q_range = (xq >= 0.05) & (xq <= 1)
     plt.scatter(xq[q_range], yi[q_range], color='cyan', s=5, label='simulated', zorder=1)
-    plt.plot(xq[q_range], yi[q_range][0] * form_factor.guinier_ff(xq[q_range], 4),
+    plt.plot(xq[q_range], yi[q_range][0]*form_factor.guinier_ff(xq[q_range], 4),
              color='black', ls='dashed', lw=2, label='form factor', zorder=3)
     plt.xlabel('q (nm^-1)')
     plt.ylabel('Intensity (arb. units)')
@@ -239,9 +240,9 @@ if __name__ == "__main__":
     plt.legend(frameon=False)
     plt.yscale('log')
     plt.xlim(xq[q_range][0], xq[q_range][-1])
-    plt.show()
 
     #Plotting the 2D data
+    #plt.imshow(det_2d)
     f = plt.figure(figsize=(6.2, 5.6))
     ax = f.add_axes([0.17, 0.02, 0.72, 0.79])
     axcolor = f.add_axes([0.90, 0.02, 0.03, 0.79])
