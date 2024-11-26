@@ -10,6 +10,8 @@ from tqdm import tqdm
 import form_factor_methods as form_factor
 from istarmap import istarmap
 from simulation_methods import *
+from matplotlib.colors import LogNorm
+import matplotlib.cm as cm
 
 # Import istarmap for simultaneous tracking of the multiprocess and its execution
 mpp.Pool.istarmap = istarmap
