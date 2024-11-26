@@ -272,7 +272,6 @@ def example_simulation():
     ax = f.add_axes([0.17, 0.02, 0.72, 0.79])
     axcolor = f.add_axes([0.90, 0.02, 0.03, 0.79])
     im = ax.matshow(det_2d, cmap=cm.viridis, norm=LogNorm(vmin=np.min(det_2d), vmax=np.max(det_2d)))
-    t = [0.01, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
     f.colorbar(im, cax=axcolor, format="$%.2f$")
     f.show()
     plt.show()
