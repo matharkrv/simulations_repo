@@ -1,57 +1,58 @@
 import numpy as np
-from scipy.interpolate import interp1d
-import form_factor_methods as form_factor
-from scipy.integrate import cumulative_trapezoid
-import multiprocessing as mp
-import multiprocessing.pool as mpp
-from tqdm import tqdm
-import matplotlib.pyplot as plt
-import tifffile as tif
-from numpy.random import SeedSequence
 import pandas as pd
+from scipy.integrate import cumulative_trapezoid
+from scipy.interpolate import interp1d
+from typing import Tuple, Optional, Callable, Union, List
 
 
-def flatten_intensity(r_array, count_array, px_area, wavelength, distance, normalization=1, return_unique=True,
-                      q_min=None, q_max=None):
+def flatten_intensity(r_array: np.ndarray,
+                      count_array: np.ndarray,
+                      px_area: float,
+                      wavelength: float,
+                      distance: float,
+                      normalization: float = 1,
+                      return_unique: bool = True,
+                      q_min: Optional[float] = None,
+                      q_max: Optional[float] = None) -> Tuple[np.ndarray, np.ndarray]:
     """
-        Flatten and normalize intensity data from 2D arrays to 1D arrays.
-        This function takes 2D arrays of radial distances and corresponding intensity counts,
-        flattens them, and applies normalization and optional filtering. It can return either
-        unique radial values with averaged intensities or the full flattened arrays.
+    Flatten and normalize intensity data from 2D arrays to 1D arrays.
+    This function takes 2D arrays of radial distances and corresponding intensity counts,
+    flattens them, and applies normalization and optional filtering. It can return either
+    unique radial values with averaged intensities or the full flattened arrays.
 
-        Parameters:
-        -----------
-        r_array : numpy.ndarray
-            2D array of radial distances.
-        count_array : numpy.ndarray
-            2D array of intensity counts corresponding to r_array.
-        px_area : float
-            Area of a single pixel.
-        wavelength : float
-            Wavelength of the radiation used.
-        distance : float
-            Sample-to-detector distance.
-        normalization : float, optional
-            Normalization factor for r_array (default is 1).
-        return_unique : bool, optional
-            If True, return unique radial values with averaged intensities (default is True).
-        q_min : float, optional
-            Minimum q value for filtering (only applied if q_max is also provided).
-        q_max : float, optional
-            Maximum q value for filtering.
+    Parameters:
+    -----------
+    r_array : numpy.ndarray
+        2D array of radial distances.
+    count_array : numpy.ndarray
+        2D array of intensity counts corresponding to r_array.
+    px_area : float
+        Area of a single pixel.
+    wavelength : float
+        Wavelength of the radiation used.
+    distance : float
+        Sample-to-detector distance.
+    normalization : float, optional
+        Normalization factor for r_array (default is 1).
+    return_unique : bool, optional
+        If True, return unique radial values with averaged intensities (default is True).
+    q_min : float, optional
+        Minimum q value for filtering (only applied if q_max is also provided).
+    q_max : float, optional
+        Maximum q value for filtering.
 
-        Returns:
-        --------
-        tuple
-            If return_unique is True:
-                (unique_R, normalized_average_counts) where
-                unique_R is an array of unique radial values, and
-                normalized_average_counts is an array of corresponding normalized average intensities.
-            If return_unique is False:
-                (r_flattened, normalized_intensity_flattened) where
-                r_flattened is the flattened and sorted radial array, and
-                normalized_intensity_flattened is the corresponding normalized intensity array.
-        """
+    Returns:
+    --------
+    tuple
+        If return_unique is True:
+            (unique_R, normalized_average_counts) where
+            unique_R is an array of unique radial values, and
+            normalized_average_counts is an array of corresponding normalized average intensities.
+        If return_unique is False:
+            (r_flattened, normalized_intensity_flattened) where
+            r_flattened is the flattened and sorted radial array, and
+            normalized_intensity_flattened is the corresponding normalized intensity array.
+    """
     # Flatten the arrays using the logic from flatten_intensity
     sorted_idx = np.argsort(r_array.flatten())
     r_flattened = r_array.flatten()[sorted_idx] * normalization
@@ -81,7 +82,9 @@ def flatten_intensity(r_array, count_array, px_area, wavelength, distance, norma
         return r_flattened[mask], (intensity_flattened * 2 * np.pi * r_flattened * normalization * norm_factor)[mask]
 
 
-def sample_from_cdf(cdf, num_samples=1, continuous=True):
+def sample_from_cdf(cdf: Union[Callable, List[float], np.ndarray],
+                    num_samples: int = 1,
+                    continuous: bool = True) -> np.ndarray:
     """
     Generate samples from an inverse cumulative distribution function (CDF).
 
@@ -109,7 +112,13 @@ def sample_from_cdf(cdf, num_samples=1, continuous=True):
         return cdf[np.random.choice(len(cdf), num_samples, replace=False)]
 
 
-def sample_from_slits(random_seed, sl1_x, sl1_y, sl2_x, sl2_y, slit_distance, sampling):
+def sample_from_slits(random_seed: np.random.Generator,
+                      sl1_x: float,
+                      sl1_y: float,
+                      sl2_x: float,
+                      sl2_y: float,
+                      slit_distance: float,
+                      sampling: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     This function generates random incidents from two slits and returns the exit angle theta, the azimuth angle chi,
     and the coordinates of the exit points for the two slits.
@@ -139,24 +148,17 @@ def sample_from_slits(random_seed, sl1_x, sl1_y, sl2_x, sl2_y, slit_distance, sa
     return np.abs(theta), chi, s2x, s2y
 
 
-def gaussian_function(x, a, b):
-    # Implementation of a Gaussian function.
-    exponent = np.exp(-0.5 * ((x - a) / b) ** 2) * (1 / (b * np.sqrt(2 * np.pi)))
-    return exponent
-
-
-def ones_function(x, R):
-    # Implementation of an 'ones' function (f(q) = 1), used for testing.
-    return np.ones_like(x * R)
-
-
-def generate_pdf(scattering_function, q_sampling):
+def generate_pdf(scattering_function: Callable,
+                 q_sampling: np.ndarray) -> np.ndarray:
     # Calculate the PDF (probability distribution function) of the given scattering signal.
     pdf = scattering_function(q_sampling)
     return pdf / np.sum(pdf * np.diff(q_sampling)[0])
 
 
-def generate_inverse_cdf(pdf, samples, continuous=True, resolution=int(1e6)):
+def generate_inverse_cdf(pdf: np.ndarray,
+                         samples: np.ndarray,
+                         continuous: bool = True,
+                         resolution: int = int(1e6)) -> Union[np.ndarray, Callable]:
     """
        This function generates an inverse cumulative distribution function (CDF-1)
        from a probability density function (PDF).
@@ -181,7 +183,8 @@ def generate_inverse_cdf(pdf, samples, continuous=True, resolution=int(1e6)):
         return inv_cdf_interp
 
 
-def clean_data(data, threshold):
+def clean_data(data: np.ndarray,
+               threshold: float) -> np.ndarray:
     """
     Clean the input data by replacing values below a threshold with the previous value.
 
@@ -208,6 +211,7 @@ def clean_data(data, threshold):
             cleaned_data[index + 1] = cleaned_data[index]
 
     return cleaned_data
+
 
 def bin_signal(x, y, x_binned):
     """
