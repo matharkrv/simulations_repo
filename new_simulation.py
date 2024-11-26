@@ -182,21 +182,6 @@ def example_simulation():
     """
     This function performs an example Monte Carlo simulation for a "Guinier form factor".
 
-    Parameters:
-    wavelength_ (float): X-ray wavelength in centimeters.
-    slit1_radius_ (list): Half-length of slit 1 in centimeters.
-    slit2_radius_ (list): Half-length of slit 2 in centimeters.
-    sample_detector_distance_ (float): Distance between the sample and the detector.
-    slit_distance_ (float): Distance between the slit.
-    detector_length_ (float): Length of the detector in centimeters.
-    detector_center_ (list): Center of the detector in centimeters.
-    pixel_number_ (int): Number of pixels on the detector.
-    photon_number_ (int): Number of photons (simulation runs).
-    LUT_resolution_ (int): Resolution of the initial scattering probability distribution LUT.
-    sampling_size_ (int): Amount of scattering incidents to be generated at once at each simulation run.
-    Rg_average_ (float): Average radius of gyration, in centimeters.
-    Rg_variance_ (float): Relative variance of the radius of gyration, unitless.
-
     Returns:
     tuple: A tuple containing the final Intensity profile and the array of exit wave vectors.
     """
