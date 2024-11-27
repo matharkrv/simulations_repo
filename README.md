@@ -15,13 +15,13 @@ if __name__ == "__main__":
 A callable example of the simulation can be done by running
 ```ruby
 if __name__ == "__main__":
-  new_simulation.example()
+    new_simulation.example()
 ```
 
 Running the simulation with custom parameters can be done using 
 ```ruby
 if __name__ == "__main__":
-  new_simulation.IqMC_2D(arguments)
+    new_simulation.IqMC_2D(arguments)
 ```
 
 An example of how these arguments look like can be seen in *run_simulation_analysis* and in the example() method of *new_simulation*. 
@@ -29,8 +29,8 @@ An example of how these arguments look like can be seen in *run_simulation_analy
 Note that the scattering function for the simulation includes polydispersity. This means that it must be formatted as function(q, param), where param is your polydisperse parameter. If the function includes more than one parameter (e.g, elliptical scattering), you must wrap it in a way that only one parameter is given to the function:
 ```ruby
 def new_function(x, param_a):
-  param_b = number
-  return old_function(x, param_a, param_b)
+    param_b = number
+    return old_function(x, param_a, param_b)
 ```
 On default, the polydisperse parameter is the radius of gyration Rg. 
 
