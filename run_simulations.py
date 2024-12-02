@@ -49,7 +49,7 @@ if __name__ == "__main__":
                                  detector_length_,
                                  detector_center_, pixel_number_, photon_number_, LUT_resolution_,
                                  sampling_size_, form_factor.guinier_ff, rg_array, distribution_, q_max=10.3e7)
-        sim_name = f"guinier_rg_{np.round(rg*1e7, 2)}_v_{variance}_slit2_y_{slit2}__slit1_y_{slit1}_distance_{dist}"
+        sim_name = f"guinier_rg_{np.round(rg*1e7, 2)}_v_{np.round(variance, 6)}_slit2_y_{slit2}__slit1_y_{slit1}_distance_{dist}"
         out_path = os.path.join(output_path, f"rg_{rg:.2f}/", f"var_{variance:.2f}/")
         out_path_sample = os.path.join(out_path, sim_name)
         out_path_qtable = os.path.join(out_path, "qtable/", sim_name)
