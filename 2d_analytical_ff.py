@@ -9,8 +9,8 @@ import os
 # Define the parameter arrays for Rg and variance
 rgs = np.linspace(4.6, 8, 1)  # Different values for Rg
 variances = np.linspace(0.01, 0.5, 5)  # Different values for variance
-sigmas_x= np.linspace(0.1, 0.33, 5)
-sigmas_y = np.linspace(3.78, 5, 5)
+sigmas_x= np.linspace(0.1, 0.33, 5)    # Array of different x axis sigmas
+sigmas_y = np.linspace(3.78, 5, 5)    # Array of different y axis sigmas
 # Fixed parameters
 resolution = 500
 px_size = 0.075
@@ -32,7 +32,7 @@ for rg, variance, sigma_x, sigma_y in product(rgs, variances, sigmas_x, sigmas_y
     # Generate the distribution of Rgs
     rg_array, distribution_ = form_factor.generate_gaussian_distribution(rg, np.sqrt(variance) * rg)
 
-    # For every pixel in the detector, calculate the intensity from the form factor
+    # For every pixel in the detector, calculate the intensity from the form factor. CHANGE FORM FACTOR HERE
     for i in range(resolution):
         for j in range(resolution):
             detector_array[i, j] += form_factor.polyP(qtable[i, j], form_factor.guinier_ff, rg_array, distribution_)
@@ -41,8 +41,7 @@ for rg, variance, sigma_x, sigma_y in product(rgs, variances, sigmas_x, sigmas_y
     Convoluted_detector = gaussian_filter(detector_array, sigma=[5, 2])
     # a = 12
     # Save the Convoluted_detector as a CSV file
-    path = ('/Users/Mathar/Library/CloudStorage/GoogleDrive-matark@mail.tau.ac.il/Drive partagés/'
-            'Beck lab 3/Matar/PAZY_xray/fake_simulations/guinier/')
+    path = 'path'
     rg_folder = f'rg_{rg:.2f}'
     variance_folder = f'variance_{variance:.2f}'
     output_folder = os.path.join(rg_folder, variance_folder)
