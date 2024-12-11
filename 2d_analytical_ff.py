@@ -38,7 +38,7 @@ for rg, variance, sigma_x, sigma_y in product(rgs, variances, sigmas_x, sigmas_y
             detector_array[i, j] += form_factor.polyP(qtable[i, j], form_factor.guinier_ff, rg_array, distribution_)
 
     # Gaussian convolution of the 2D array based on the given sigmas
-    Convoluted_detector = gaussian_filter(detector_array, sigma=[5, 2])
+    Convoluted_detector = gaussian_filter(detector_array, sigma=[sigma_x, sigma_y])
     # a = 12
     # Save the Convoluted_detector as a CSV file
     path = 'path'
